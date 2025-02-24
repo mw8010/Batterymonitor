@@ -140,8 +140,8 @@ In the `/3d-files` folder, you will find STEP files for a suitable enclosure tha
 - **`/3d-files`** – Contains the STEP files for a suitable enclosure.
 
 ## License
-- **Software:** [GNU General Public License v3.0](LICENSE)  
-- **Hardware:** [CERN Open Hardware Licence v2 - Strongly Reciprocal](LICENSE-HARDWARE)
+- **Software:** [GNU General Public License v3.0](license.md)  
+- **Hardware:** [CERN Open Hardware Licence v2 - Strongly Reciprocal](license.md)
 
 ## Acknowledgments
 This project is based on the [Battery Monitor Project by Techstyleuk](https://github.com/Techstyleuk/SensESP_3_Battery_Monitor).
