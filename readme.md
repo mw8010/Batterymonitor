@@ -3,10 +3,7 @@
 ## Overview
 This project is a DIY battery monitor for our trawler. It uses an ESP32 to measure current, voltage, and power with the INA226 sensor. The collected data is integrated into Signal K via SenseESP. Additionally, a OneWire temperature sensor is used to monitor battery temperature.
 
-## What is Signal K?
-[Signal K](https://signalk.org/) is an open data format for marine electronics. It enables the integration and exchange of sensor data between various devices and applications on board a boat.
-
-### Why High-Side Current Sensing?
+## Why High-Side Current Sensing?
 
 High-side current sensing means placing the shunt resistor between the positive battery terminal and the load. This method has several advantages:
 
@@ -14,6 +11,9 @@ High-side current sensing means placing the shunt resistor between the positive 
 - It prevents ground loops, which can introduce noise and affect measurement accuracy.
 - It is safer for systems with multiple ground connections and helps maintain proper system grounding.
 - Modern sensors like the INA226 are designed for high-side sensing, providing better accuracy and compatibility with high-voltage applications.
+
+## What is Signal K?
+[Signal K](https://signalk.org/) is an open data format for marine electronics. It enables the integration and exchange of sensor data between various devices and applications on board a boat.
 
 ## What is SenseESP?
 [SenseESP](https://github.com/SignalK/SensESP) is an open-source framework that simplifies the development of sensors that transmit their data to a Signal K server via Wi-Fi. It is based on the ESP32 and uses a modular architecture for flexible customization.
