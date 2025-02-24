@@ -109,7 +109,7 @@ Die folgenden Parameter können über die Web-UI von SenseESP angepasst werden:
 **Platine**
 - Zur leichteren Verbindung der Komponenten können Sie die Gerber-Dateien im Ordner `/gerber` verwenden, um eine passende Platine zu bestellen.
 
-![Paltine](pic/platine.jpeg)
+![Platine](pic/platine.jpeg)
 
 **Gehäuse**
 - Im Ordner `/3D-Print` finden Sie STEP-Dateien für ein passenses Gehäuse, das Sie ausdrucken können, um die fertige Platine zu schützen und zu montieren.

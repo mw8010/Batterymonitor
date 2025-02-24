@@ -21,7 +21,7 @@ This project is a DIY battery monitor for our trawler. It uses an ESP32 to measu
 - **ESP32 D1 Mini** – Microcontroller
 - **INA226 CJMCU** – Current sensor
 - **DS18B20** – Temperature sensor
-- **3A Mini DC-DC Buck Step Down Converter** – Voltage regulator
+- **3A Mini DC-DC Buck Step Down Converter** – Voltage converter
 - **Shunt resistor** – For current measurement (adapted to the maximum current)
 
 ## Terminal Assignments
@@ -45,19 +45,31 @@ This project is a DIY battery monitor for our trawler. It uses an ESP32 to measu
 
 ## Installation
 ### 1. Preparation
-- Install Arduino IDE or PlatformIO
+- Install PlatformIO (recommended)
+  - [PlatformIO IDE for VSCode](https://platformio.org/install/ide?install=vscode)
+  - [PlatformIO IDE for Atom](https://platformio.org/install/ide?install=atom)
+  - [PlatformIO Core (CLI)](https://docs.platformio.org/en/latest/core/installation.html)
 - Install required libraries:
   - [SignalK/SenseESP](https://github.com/SignalK/SensESP)
   - [sensesp/OneWire](https://github.com/PaulStoffregen/OneWire)
   - [INA226](https://github.com/RobTillaart/INA226)
 
-### 2. Uploading the Code
-- Use the Arduino IDE or PlatformIO to upload the code to the ESP32.
+### 2. Clone the repository
+- Clone or download this repository to your local machine:
+  ```sh
+  git clone https://github.com/YourUsername/Batteriemonitor.git
+  cd Batteriemonitor
+  ```
 
-### 3. Configuring Signal K Server
-- After the first boot, the device will create an access point.
-- Connect to the network and enter the Wi-Fi credentials.
-- The data should now appear on the Signal K server under the configured paths.
+### 3. Upload the code
+Open the project in PlatformIO.
+Upload the code to your ESP32.
+
+### 4. Configure SenseESP
+After the first start, the ESP32 will open an access point.
+Connect to the network and enter the Wi-Fi credentials (Wi-Fi password: thisisfine).
+Use the SenseESP web UI to configure the battery (see Configuration) and connect the ESP32 to the network where the Signal K server is running.
+The data should now appear on the Signal K server under the configured paths.
 
 ## Configuration
 The following parameters can be adjusted via the SenseESP web UI:
@@ -75,6 +87,38 @@ The following parameters can be adjusted via the SenseESP web UI:
 - Configuration changes can be made via the web UI.
 - Alarm notifications are triggered when defined thresholds are exceeded.
 
+### Hardware Installation Notes
+**Shunt Resistor**
+
+- The shunt resistor must be installed on the high side of the battery. This means that the shunt is placed between the positive battery terminal and the load.
+- Connect the positive battery terminal to one end of the shunt resistor.
+- Connect the other end of the shunt resistor to the load (e.g., the consumer or the charger).
+- Ensure that all connections are tight and secure to ensure accurate measurements.
+
+**INA226 Sensor**
+
+- Connect the INA226 sensor to the shunt resistor according to the schematic.
+- Ensure that the voltage and current measurement lines are connected correctly:
+  - `VIN+` of the INA226 to the end of the shunt connected to the positive battery terminal.
+  - `VIN-` of the INA226 to the end of the shunt connected to the load.
+  - `VBUS` connected to the positive battery terminal.
+- Connect the INA226 sensor to the ESP32 according to the schematic.
+
+**ESP32**
+
+- Connect the ESP32 to the INA226 sensor and the OneWire temperature sensor according to the schematic.
+- Ensure that the ESP32 is properly powered (e.g., via a DC-DC Buck Step Down Converter).
+
+**PCB**
+
+- To facilitate the connection of the components, you can use the Gerber files in the gerber folder to order a suitable PCB.
+
+![PCB](pic/platine.jpeg)
+
+### Enclosure
+
+In the `/3D-Print` folder, you will find STEP files for a suitable enclosure that you can print to protect and mount the finished PCB.
+
 ## Used Components
 - [ESP32 D1 Mini](https://de.aliexpress.com/item/1005006267267848.html)
 - [INA226 CJMCU](https://de.aliexpress.com/item/1005001972537281.html)
@@ -84,6 +128,7 @@ The following parameters can be adjusted via the SenseESP web UI:
 ## Repository Files
 - **`/gerber`** – Contains Gerber files for the PCB.
 - **`/schematic`** – Contains the circuit diagram.
+- **`/3D-Print`** – Contains the STEP files for a suitable enclosure.
 
 ## License
 - **Software:** [GNU General Public License v3.0](LICENSE)  
