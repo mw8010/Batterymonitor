@@ -119,7 +119,7 @@ Die folgenden Parameter können über die Web-UI von SenseESP angepasst werden:
 ![Platine](pic/platine.jpeg)
 
 **Gehäuse**
-- Im Ordner `/3D-Print` finden Sie STEP-Dateien für ein passenses Gehäuse, das Sie ausdrucken können, um die fertige Platine zu schützen und zu montieren.
+- Im Ordner `/3d-files` finden Sie STEP-Dateien für ein passenses Gehäuse, das Sie ausdrucken können, um die fertige Platine zu schützen und zu montieren.
 
 ## Verwendete Komponenten
 - [ESP32 D1 Mini](https://de.aliexpress.com/item/1005006267267848.html)
@@ -130,7 +130,7 @@ Die folgenden Parameter können über die Web-UI von SenseESP angepasst werden:
 ## Dateien im Repository
 - **`/gerber`** – Enthält die Gerber-Dateien für die Platine.
 - **`/schaltplan`** – Enthält den Schaltplan.
-- **`/3D-Print`** - Enthält die STEP-Dateien für ein passendes Gehäuse.
+- **`/3d-files`** - Enthält die STEP-Dateien für ein passendes Gehäuse.
 
 ## Lizenz
 - **Software:** GNU General Public License v3.0

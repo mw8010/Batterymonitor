@@ -126,7 +126,7 @@ The following parameters can be adjusted via the SenseESP web UI:
 
 ### Enclosure
 
-In the `/3D-Print` folder, you will find STEP files for a suitable enclosure that you can print to protect and mount the finished PCB.
+In the `/3d-files` folder, you will find STEP files for a suitable enclosure that you can print to protect and mount the finished PCB.
 
 ## Used Components
 - [ESP32 D1 Mini](https://de.aliexpress.com/item/1005006267267848.html)
@@ -137,7 +137,7 @@ In the `/3D-Print` folder, you will find STEP files for a suitable enclosure tha
 ## Repository Files
 - **`/gerber`** – Contains Gerber files for the PCB.
 - **`/schematic`** – Contains the circuit diagram.
-- **`/3D-Print`** – Contains the STEP files for a suitable enclosure.
+- **`/3d-files`** – Contains the STEP files for a suitable enclosure.
 
 ## License
 - **Software:** [GNU General Public License v3.0](LICENSE)  
