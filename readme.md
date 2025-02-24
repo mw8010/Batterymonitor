@@ -6,6 +6,15 @@ This project is a DIY battery monitor for our trawler. It uses an ESP32 to measu
 ## What is Signal K?
 [Signal K](https://signalk.org/) is an open data format for marine electronics. It enables the integration and exchange of sensor data between various devices and applications on board a boat.
 
+### Why High-Side Current Sensing?
+
+High-side current sensing means placing the shunt resistor between the positive battery terminal and the load. This method has several advantages:
+
+- It ensures that all current drawn from the battery is accurately measured, avoiding errors caused by multiple ground paths.
+- It prevents ground loops, which can introduce noise and affect measurement accuracy.
+- It is safer for systems with multiple ground connections and helps maintain proper system grounding.
+- Modern sensors like the INA226 are designed for high-side sensing, providing better accuracy and compatibility with high-voltage applications.
+
 ## What is SenseESP?
 [SenseESP](https://github.com/SignalK/SensESP) is an open-source framework that simplifies the development of sensors that transmit their data to a Signal K server via Wi-Fi. It is based on the ESP32 and uses a modular architecture for flexible customization.
 

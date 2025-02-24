@@ -3,6 +3,13 @@
 ## Überblick
 Dieses Projekt ist ein DIY-Batteriemonitor für unseren Trawler. Es nutzt einen ESP32, um mit dem INA226-Sensor Strom, Spannung und Leistung zu messen. Die erfassten Daten werden über SenseESP in Signal K integriert. Zudem wird ein OneWire-Temperatursensor zur Überwachung der Batterietemperatur verwendet.
 
+### Warum High-Side-Strommessung?
+Die High-Side-Strommessung bedeutet, dass der Shunt-Widerstand zwischen dem positiven Batteriepol und der Last platziert wird. Diese Methode hat mehrere Vorteile:
+- Sie stellt sicher, dass der gesamte von der Batterie gezogene Strom genau gemessen wird, wodurch Fehler durch mehrere Erdungspfade vermieden werden.
+- Sie verhindert Erdschleifen, die Rauschen einführen und die Messgenauigkeit beeinträchtigen können.
+- Sie ist sicherer für Systeme mit mehreren Erdungsverbindungen und hilft, eine ordnungsgemäße Systemerdung aufrechtzuerhalten.
+- Moderne Sensoren wie der INA226 sind für die High-Side-Messung ausgelegt und bieten eine höhere Genauigkeit sowie Kompatibilität mit Hochspannungsanwendungen.
+
 ## Was ist Signal K?
 [Signal K](https://signalk.org/) ist ein offenes Datenformat für die maritime Elektronik. Es ermöglicht die Integration und den Austausch von Sensordaten zwischen verschiedenen Geräten und Anwendungen an Bord eines Boots.
 
