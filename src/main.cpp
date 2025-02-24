@@ -324,9 +324,9 @@ void IRAM_ATTR handle_Alert() {
 
 void setup() {
     Serial.begin(115200);
-    Wire.begin(22, 21);
-    pinMode(25, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(25), handle_Alert, FALLING);
+    Wire.begin(22, 21); // I2C Pins für INA226 (SDA, SCL)
+    pinMode(25, INPUT_PULLUP); // Alarm-Pin
+    attachInterrupt(digitalPinToInterrupt(25), handle_Alert, FALLING); // Interrupt für Alarm-Pin
 
     SetupLogging();
 
@@ -340,8 +340,8 @@ void setup() {
         return;
     }
 
-    setupBattery();
-    initINA226();
+    setupBattery(); // Konfiguriere die Batterie
+    initINA226(); // Initialisiere den INA226
 
     // Initialisiere den Temperatursensor
     DallasTemperatureSensors* dts = new DallasTemperatureSensors(pin);
