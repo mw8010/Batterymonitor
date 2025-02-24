@@ -66,7 +66,7 @@ High-side current sensing means placing the shunt resistor between the positive 
 ### 2. Clone the repository
 - Clone or download this repository to your local machine:
   ```sh
-  git clone https://github.com/YourUsername/Batteriemonitor.git
+  git clone https://github.com/mw8010/Batteriemonitor.git
   cd Batteriemonitor
   ```
 

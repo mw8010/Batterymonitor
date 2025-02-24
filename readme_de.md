@@ -64,7 +64,7 @@ Die High-Side-Strommessung bedeutet, dass der Shunt-Widerstand zwischen dem posi
 ### 2. Repository klonen
 - Klonen oder laden Sie dieses Repository auf Ihren lokalen Rechner:
   ```sh
-  git clone https://github.com/IhrBenutzername/Batteriemonitor.git
+  git clone https://github.com/mw8010/Batteriemonitor.git
   cd Batteriemonitor
   ```
 
