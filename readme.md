@@ -44,7 +44,8 @@ High-side current sensing means placing the shunt resistor between the positive 
 - `electrical.batteries.<battery_name>.voltage` – Battery voltage in V
 - `electrical.batteries.<battery_name>.current` – Battery current in A
 - `electrical.batteries.<battery_name>.power` – Battery power in W
-- `electrical.batteries.<battery_name>.stateOfCharge` – State of charge in %
+- `electrical.batteries.<battery_name>.stateOfCharge` – State of charge in % (coulomb counting)
+- `electrical.batteries.<battery_name>.stateOfCharge_voltageSoC` – State of charge based on voltage in %
 - `electrical.batteries.<battery_name>.ampHours` – Remaining Ah
 - `electrical.batteries.<battery_name>.timeToGo` – Remaining time in seconds
 - `electrical.batteries.<battery_name>.temperature` – Battery temperature in °K
@@ -83,7 +84,7 @@ The data should now appear on the Signal K server under the configured paths.
 ## Configuration
 The following parameters can be adjusted via the SenseESP web UI:
 - Battery type (LiFePO4, AGM, Gel, Lead-Acid)
-- Battery voltage (12V or 24V)
+- Battery voltage (12V, 24V, 48V (LifePO4 only))
 - Battery capacity in Ah
 - Maximum shunt current
 - Shunt voltage in mV

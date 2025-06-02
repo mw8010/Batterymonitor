@@ -42,7 +42,8 @@ Die High-Side-Strommessung bedeutet, dass der Shunt-Widerstand zwischen dem posi
 - `electrical.batteries.<battery_name>.voltage` – Batteriespannung in V
 - `electrical.batteries.<battery_name>.current` – Batteriestrom in A
 - `electrical.batteries.<battery_name>.power` – Batterieleistung in W
-- `electrical.batteries.<battery_name>.stateOfCharge` – Ladezustand in %
+- `electrical.batteries.<battery_name>.stateOfCharge` – Ladezustand in % (Coulomb-Zählung)
+- `electrical.batteries.<battery_name>.stateOfCharge_voltageSoC` – Ladezustand in % (spannungsbasiert)
 - `electrical.batteries.<battery_name>.ampHours` – verbleibende Ah
 - `electrical.batteries.<battery_name>.timeToGo` – verbleibende Zeit in Sekunden
 - `electrical.batteries.<battery_name>.temperature` – Batterietemperatur in °K
@@ -81,7 +82,7 @@ Die High-Side-Strommessung bedeutet, dass der Shunt-Widerstand zwischen dem posi
 ## Konfiguration
 Die folgenden Parameter können über die Web-UI von SenseESP angepasst werden:
 - Batterietyp (LiFePO4, AGM, Gel, Bleisäure)
-- Batteriespannung (12V oder 24V)
+- Batteriespannung (12V, 24V oder 48V (LifePO4 only))
 - Batteriekapazität in Ah
 - Maximalstrom des Shunts
 - Shunt-Spannung in mV
