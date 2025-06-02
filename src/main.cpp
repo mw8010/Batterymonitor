@@ -19,8 +19,10 @@ INA226 INA0(0x40);
 // Setze Wifi-Netzwerkdaten
 const char* hostname = "BatteryShuntESP";
 
-// Variablen Temperatursensor
+// Variable Temperatursensor
 uint8_t pin = 2; // Pin, an dem der Temperatursensor angeschlossen ist
+
+// Abfrageintervall für die Sensoren
 uint read_delay = 1000; // Zeit zwischen den Messungen
 
 // Globale Variablen für Batterietyp, Spannung und AH
@@ -82,6 +84,9 @@ float calculateShuntResistance(float max_current, float shunt_voltage) {
     return shunt_voltage / max_current;
 }
 
+//Globale Variable für den SoC-Interpreter
+std::unique_ptr<SoCAInterpreter> soc_interpolator; // SoC-Interpreter für die Batterie
+
 // SOCA-Interpreter Klasse
 class SoCAInterpreter : public CurveInterpolator {
     public:
@@ -113,6 +118,18 @@ class SoCAInterpreter : public CurveInterpolator {
             add_sample(CurveInterpolator::Sample(27.2, 0.8)); // 80%
             add_sample(CurveInterpolator::Sample(28.0, 0.9)); // 90%
             add_sample(CurveInterpolator::Sample(29.2, 1.0)); // 100%
+        } else if (system_voltage == 48 && battery_type == "LiFePO4") {
+            add_sample(CurveInterpolator::Sample(48.0, 0.0));  // 0% (3.00V/Zelle)
+            add_sample(CurveInterpolator::Sample(48.8, 0.1));  // 10%
+            add_sample(CurveInterpolator::Sample(49.6, 0.2));  // 20%
+            add_sample(CurveInterpolator::Sample(50.4, 0.3));  // 30%
+            add_sample(CurveInterpolator::Sample(51.2, 0.4));  // 40%
+            add_sample(CurveInterpolator::Sample(52.0, 0.5));  // 50%
+            add_sample(CurveInterpolator::Sample(52.8, 0.6));  // 60%
+            add_sample(CurveInterpolator::Sample(53.6, 0.7));  // 70%
+            add_sample(CurveInterpolator::Sample(54.0, 0.8));  // 80%
+            add_sample(CurveInterpolator::Sample(54.2, 0.9));  // 90%
+            add_sample(CurveInterpolator::Sample(54.4, 1.0));  // 100% (3.40V/Zelle)
         } else if (system_voltage == 12 && battery_type == "AGM") {
             add_sample(CurveInterpolator::Sample(10.5, 0.0)); // 0%
             add_sample(CurveInterpolator::Sample(11.0, 0.1)); // 10%
@@ -141,11 +158,11 @@ class SoCAInterpreter : public CurveInterpolator {
             add_sample(CurveInterpolator::Sample(10.5, 0.0)); // 0%
             add_sample(CurveInterpolator::Sample(11.4, 0.1)); // 10%
             add_sample(CurveInterpolator::Sample(11.6, 0.2)); // 20%
-            add_sample(CurveInterpolator::Sample(11.75, 0.3)); // 30%
+            add_sample(CurveInterpolator::Sample(11.75, 0.3));// 30%
             add_sample(CurveInterpolator::Sample(11.9, 0.4)); // 40%
             add_sample(CurveInterpolator::Sample(12.0, 0.5)); // 50%
             add_sample(CurveInterpolator::Sample(12.2, 0.6)); // 60%
-            add_sample(CurveInterpolator::Sample(12.35, 0.7)); // 70%
+            add_sample(CurveInterpolator::Sample(12.35, 0.7));// 70%
             add_sample(CurveInterpolator::Sample(12.5, 0.8)); // 80%
             add_sample(CurveInterpolator::Sample(12.7, 0.9)); // 90%
             add_sample(CurveInterpolator::Sample(12.9, 1.0)); // 100%   
@@ -205,7 +222,7 @@ void setupBattery() {
         ->set_sort_order(100);
     ConfigItem(battery_voltage_config)
         ->set_title("Battery Voltage")
-        ->set_description("12V, 24V")
+        ->set_description("12V, 24V, 48V (only LiFePO4 supported)")
         ->set_sort_order(200);
     ConfigItem(battery_capacity_config)
         ->set_title("Battery Capacity (Ah)")
@@ -247,8 +264,17 @@ void setupBattery() {
     // Berechne den Shunt-Widerstand basierend auf dem maximalen Strom und der Spannung
     shunt_resistance = calculateShuntResistance(max_current, shunt_voltage);
 
-    // Initialisieren einen SoC Interpreter auf Basis der Konfigurationswerte
-    SoCAInterpreter* soc_interpreter = new SoCAInterpreter(battery_type, battery_voltage);
+    // Erstelle den SoC-Interpreter mit den geladenen Konfigurationswerten
+    soc_interpolator.reset(new SoCAInterpreter(battery_type, battery_voltage));    
+}
+
+// Hilfsfunktion: 100%-Spannung aus CurveInterpolator
+float getFullVoltage() {
+    auto& samples = soc_interpolator->get_samples();
+    if (!samples.empty()) {
+        return samples.back().x;
+    }
+    return 0.0; // Rückgabe 0, wenn keine Samples vorhanden sind
 }
 
 float shunt_over_voltage_limit = max_current * shunt_resistance * 1000;
@@ -297,9 +323,17 @@ void updateAmpHours() {
     unsigned long current_time = millis();
     float time_diff = (current_time - last_time) / 1000.0;
     float current = INA0.getCurrent();
+    float voltage = INA0.getBusVoltage();
+
+    // Automatischer Reset, wenn Batteriespannung >= 100% (mit Toleranz)
+    float full_voltage = getFullVoltage();
+    if (full_voltage > 0.0 && voltage >= (full_voltage - 0.05)) { // 0.05V Toleranz
+        total_amp_hours = 0; // Setze die verbrauchten Ampere-Stunden zurück
+        amp_hours_used = 0; // Setze die verbrauchten Ampere-Stunden zurück
+    }
     total_amp_hours += calculateAmpHours(current, time_diff);
-    amp_hours_used = total_amp_hours;
-    last_time = current_time;
+    amp_hours_used = total_amp_hours; // Aktualisiere die verbrauchten Ampere-Stunden
+    last_time = current_time; // Aktualisiere die letzte Zeit
 }
 
 float calculateTimeToGo(float current, float amp_hours_used) {
@@ -347,9 +381,9 @@ void setup() {
     DallasTemperatureSensors* dts = new DallasTemperatureSensors(pin);
 
     // INA0
-    auto* ina0_current = new RepeatSensor<float>(1000, read_INA0_current_callback);
-    auto* ina0_voltage = new RepeatSensor<float>(1000, read_INA0_voltage_callback);
-    auto* ina0_power = new RepeatSensor<float>(1000, read_INA0_power_callback);
+    auto* ina0_current = new RepeatSensor<float>(read_delay, read_INA0_current_callback);
+    auto* ina0_voltage = new RepeatSensor<float>(read_delay, read_INA0_voltage_callback);
+    auto* ina0_power = new RepeatSensor<float>(read_delay, read_INA0_power_callback);
 
     // Hinzufügen der INA0-Werte (Current, Voltage & Power) zu Signal K
     ina0_current->connect_to(new SKOutputFloat(sk_path_current.c_str(), metadata_current));
@@ -357,27 +391,32 @@ void setup() {
     ina0_power->connect_to(new SKOutputFloat(sk_path_power.c_str(), metadata_power));
 
     // Hinzufügen der Ampere-Stunden Used zu Signal K
-    auto* ina0_amp_hours = new RepeatSensor<float>(1000, []() {
+    auto* ina0_amp_hours = new RepeatSensor<float>(read_delay, []() {
         updateAmpHours();
         return total_amp_hours;
     });
     ina0_amp_hours->connect_to(new SKOutputFloat(sk_path_ah.c_str(), metadata_ah));
 
     // Hinzufügen der Time-to-go zu Signal K
-    auto* ina0_time_to_go = new RepeatSensor<float>(1000, []() {
+    auto* ina0_time_to_go = new RepeatSensor<float>(read_delay, []() {
         float current = INA0.getCurrent();
         return calculateTimeToGo(current, amp_hours_used);
     });
     ina0_time_to_go->connect_to(new SKOutputFloat(sk_path_time_to_go.c_str(), metadata_time_to_go));
 
     // Hinzufügen des State of Charge zu Signal K
-    auto* ina0_soc = new RepeatSensor<float>(1000, []() {
+    auto* ina0_soc = new RepeatSensor<float>(read_delay, []() {
         return calculateSoC(total_amp_hours, battery_capacity);
     });
     ina0_soc->connect_to(new SKOutputFloat(sk_path_soc.c_str(), metadata_soc));
 
+    // Spannungsbasierten SoC zusätzlich an Signal K senden
+    auto* soc_voltage_sensor = new RepeatSensor<float>(read_delay, read_INA0_voltage_callback);
+    soc_voltage_sensor  ->connect_to(static_cast<CurveInterpolator*>(soc_interpolator.get()))
+                        ->connect_to(new SKOutputFloat((sk_path_soc + "_voltageSoC").c_str(), metadata_soc));
+
     // Hinzufügen des Temperatursensors zu Signal K
-    auto* battery_temp = new OneWireTemperature(dts, 1000, temp_one_wire_path.c_str());
+    auto* battery_temp = new OneWireTemperature(dts, read_delay, temp_one_wire_path.c_str());
     battery_temp->connect_to(new Linear(1.0, 0.0, temp_linear_path.c_str()))
                 ->connect_to(new SKOutputFloat(temp_sk_path.c_str(), metadata_temp));
 
