@@ -84,9 +84,6 @@ float calculateShuntResistance(float max_current, float shunt_voltage) {
     return shunt_voltage / max_current;
 }
 
-//Globale Variable für den SoC-Interpreter
-std::unique_ptr<SoCAInterpreter> soc_interpolator; // SoC-Interpreter für die Batterie
-
 // SOCA-Interpreter Klasse
 class SoCAInterpreter : public CurveInterpolator {
     public:
@@ -206,6 +203,9 @@ class SoCAInterpreter : public CurveInterpolator {
     }
 };
 
+//Globale Variable für den SoC-Interpreter
+std::unique_ptr<SoCAInterpreter> soc_interpolator; // SoC-Interpreter für die Batterie
+
 void setupBattery() {
     // Konfiguriere, SesEsp WebUi für die Batteriewahl
     auto battery_type_config = std::make_shared<StringConfig>(battery_type, battery_type_config_path);
@@ -272,7 +272,7 @@ void setupBattery() {
 float getFullVoltage() {
     auto& samples = soc_interpolator->get_samples();
     if (!samples.empty()) {
-        return samples.back().x;
+        return std::prev(samples.end())->input_; // Letzter Eintrag ist 100%
     }
     return 0.0; // Rückgabe 0, wenn keine Samples vorhanden sind
 }
