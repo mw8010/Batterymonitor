@@ -300,7 +300,7 @@ void initINA226() {
 }
 
 float read_INA0_current_callback(){
-    return INA0.getCurrent();
+    return -INA0.getCurrent();
 }
 float read_INA0_voltage_callback(){
     return INA0.getBusVoltage();

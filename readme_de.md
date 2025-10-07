@@ -3,12 +3,17 @@
 ## Überblick
 Dieses Projekt ist ein DIY-Batteriemonitor für unseren Trawler. Es nutzt einen ESP32, um mit dem INA226-Sensor Strom, Spannung und Leistung zu messen. Die erfassten Daten werden über SenseESP in Signal K integriert. Zudem wird ein OneWire-Temperatursensor zur Überwachung der Batterietemperatur verwendet.
 
-## Warum High-Side-Strommessung?
-Die High-Side-Strommessung bedeutet, dass der Shunt-Widerstand zwischen dem positiven Batteriepol und der Last platziert wird. Diese Methode hat mehrere Vorteile:
-- Sie stellt sicher, dass der gesamte von der Batterie gezogene Strom genau gemessen wird, wodurch Fehler durch mehrere Erdungspfade vermieden werden.
-- Sie verhindert Erdschleifen, die Rauschen einführen und die Messgenauigkeit beeinträchtigen können.
-- Sie ist sicherer für Systeme mit mehreren Erdungsverbindungen und hilft, eine ordnungsgemäße Systemerdung aufrechtzuerhalten.
-- Moderne Sensoren wie der INA226 sind für die High-Side-Messung ausgelegt und bieten eine höhere Genauigkeit sowie Kompatibilität mit Hochspannungsanwendungen.
+## Warum Low-Side-Strommessung?
+Die Low-Side-Strommessung bedeutet, dass der Shunt-Widerstand zwischen dem negativen Batteriepol und dem Massepunkt (GND) platziert wird.  
+Diese Methode ist besonders für höhere Batteriespannungen (z. B. 48 V) empfohlen, da der INA226 so immer innerhalb seiner Spezifikation arbeitet und keine Fehlmessungen oder Schäden auftreten.
+
+**Vorteile:**
+- Der INA226 bleibt immer im sicheren Spannungsbereich (max. 36 V Common-Mode).
+- Einfache und sichere Verdrahtung für die meisten Installationen (Fahrzeuge, Boote).
+- Kein Spannungsteiler am INA226 nötig.
+
+**Hinweis:**  
+Das gemessene Strom-Vorzeichen kann invertiert sein. Dies wird im Code korrigiert.
 
 ## Was ist Signal K?
 [Signal K](https://signalk.org/) ist ein offenes Datenformat für die maritime Elektronik. Es ermöglicht die Integration und den Austausch von Sensordaten zwischen verschiedenen Geräten und Anwendungen an Bord eines Boots.
@@ -34,9 +39,9 @@ Die High-Side-Strommessung bedeutet, dass der Shunt-Widerstand zwischen dem posi
 ## Klemmenbelegung
 | Klemme | Bezeichnung         | Beschreibung            |
 |--------|---------------------|-------------------------|
-| **U1** | Power IN           | + / - (6 - 32V)        |
+| **U1** | Power IN           | + / - (6 - 48V)        |
 | **U2** | Temperatursensor   | + / - / Data           |
-| **U4** | INA226             | VBUS / IN - / IN +     |
+| **U4** | INA226             | VBUS / IN- / IN+       |
 
 ## Signal K Datenpunkte
 - `electrical.batteries.<battery_name>.voltage` – Batteriespannung in V
@@ -73,7 +78,7 @@ Die High-Side-Strommessung bedeutet, dass der Shunt-Widerstand zwischen dem posi
 - Öffnen Sie das Projekt in PlatformIO.
 - Laden Sie den Code auf Ihren ESP32.
 
-### 3. SensESP konfigurieren
+### 4. SensESP konfigurieren
 - Nach dem ersten Start öffnet der ESP32 einen Access Point.
 - Verbinden Sie sich mit dem Netzwerk und geben Sie die WLAN-Zugangsdaten ein (WLAN Passwort: thisisfine).
 - Über die Web-UI von SensESP können Sie die Batterie konfigurieren (siehe Konfiguration) und den ESP32 in das Netzwerk einbinden, in dem der Signal K Server läuft.
@@ -82,7 +87,7 @@ Die High-Side-Strommessung bedeutet, dass der Shunt-Widerstand zwischen dem posi
 ## Konfiguration
 Die folgenden Parameter können über die Web-UI von SenseESP angepasst werden:
 - Batterietyp (LiFePO4, AGM, Gel, Bleisäure)
-- Batteriespannung (12V, 24V oder 48V (LifePO4 only))
+- Batteriespannung (12V, 24V oder 48V (nur LiFePO4))
 - Batteriekapazität in Ah
 - Maximalstrom des Shunts
 - Shunt-Spannung in mV
@@ -95,24 +100,24 @@ Die folgenden Parameter können über die Web-UI von SenseESP angepasst werden:
 - Änderungen an der Konfiguration können über die Web-UI vorgenommen werden.
 - Alarmmeldungen werden bei Über- oder Unterschreiten der definierten Grenzwerte ausgelöst.
 
-## Hinweise zur Hardware-Installation
-**Shunt-Widerstand**
-- Der Shunt-Widerstand muss auf der High-Seite der Batterie installiert werden. Das bedeutet, dass der Shunt zwischen dem positiven Batteriepol und der Last platziert wird.
-- Verbinden Sie den positiven Batteriepol mit einem Ende des Shunt-Widerstands.
-- Verbinden Sie das andere Ende des Shunt-Widerstands mit der Last (z.B. dem Verbraucher oder dem Ladegerät).
-- Stellen Sie sicher, dass alle Verbindungen fest und sicher sind, um genaue Messungen zu gewährleisten.
+### Hinweise zur Hardware-Installation
+**Shunt-Widerstand (Low-Side-Messung)**
+- Der Shunt-Widerstand muss zwischen dem negativen Batteriepol und dem System-Massepunkt (GND) installiert werden.
+- Verbinden Sie den negativen Batteriepol mit einem Ende des Shunt-Widerstands.
+- Verbinden Sie das andere Ende des Shunt-Widerstands mit dem Massepunkt (GND).
+- Alle Verbraucher und der ESP32 bleiben wie gewohnt mit Masse verbunden.
+- Achten Sie auf sichere und feste Verbindungen für genaue Messungen.
 
-**INA226-Sensor**
-- Verbinden Sie den INA226-Sensor mit dem Shunt-Widerstand gemäß dem Schaltplan.
-- Stellen Sie sicher, dass die Spannungs- und Strommessleitungen korrekt angeschlossen sind:
-  - `VIN+` des INA226 an das Ende des Shunt, das mit dem positiven Batteriepol verbunden ist.
-  - `VIN-` des INA226 an das Ende des Shunts, das mit der Last verbunden ist.
-  - `VBUS` mit dem positiven Batteriepol verbunden ist.
-- Verbinden Sie den INA226-Sensor mit dem ESP32 gemäß dem Schaltplan.
+**INA226-Sensor (Low-Side-Verdrahtung)**
+- Verbinden Sie den INA226-Sensor mit dem Shunt-Widerstand gemäß Schaltplan:
+  - `IN+` des INA226 an das Ende des Shunt, das mit dem negativen Batteriepol verbunden ist.
+  - `IN-` des INA226 an das Ende des Shunt, das mit dem Massepunkt (GND) verbunden ist.
+  - `VBUS` ebenfalls mit Masse (GND) verbinden.
+- Verbinden Sie den INA226-Sensor mit dem ESP32 gemäß Schaltplan.
 
 **ESP32**
-- Verbinden Sie den ESP32 mit dem INA226-Sensor und dem OneWire-Temperatursensor gemäß dem Schaltplan.
-- Stellen Sie sicher, dass der ESP32 korrekt mit Strom versorgt wird. (z.B. über einen DC-DC Buck Step Down Converter)
+- Verbinden Sie den ESP32 mit dem INA226-Sensor und dem OneWire-Temperatursensor gemäß Schaltplan.
+- Stellen Sie sicher, dass der ESP32 korrekt mit Strom versorgt wird (z.B. über einen DC-DC Buck Step Down Converter).
 
 **Platine**
 - Zur leichteren Verbindung der Komponenten können Sie die Gerber-Dateien im Ordner `/gerber` verwenden, um eine passende Platine zu bestellen.
@@ -120,7 +125,7 @@ Die folgenden Parameter können über die Web-UI von SenseESP angepasst werden:
 ![Platine](pic/platine.jpeg)
 
 **Gehäuse**
-- Im Ordner `/3d-files` finden Sie STEP-Dateien für ein passenses Gehäuse, das Sie ausdrucken können, um die fertige Platine zu schützen und zu montieren.
+- Im Ordner `/3d-files` finden Sie STEP-Dateien für ein passendes Gehäuse, das Sie ausdrucken können, um die fertige Platine zu schützen und zu montieren.
 
 ## Verwendete Komponenten
 - [ESP32 D1 Mini](https://de.aliexpress.com/item/1005006267267848.html)
@@ -131,7 +136,7 @@ Die folgenden Parameter können über die Web-UI von SenseESP angepasst werden:
 ## Dateien im Repository
 - **`/gerber`** – Enthält die Gerber-Dateien für die Platine.
 - **`/schaltplan`** – Enthält den Schaltplan.
-- **`/3d-files`** - Enthält die STEP-Dateien für ein passendes Gehäuse.
+- **`/3d-files`** – Enthält die STEP-Dateien für ein passendes Gehäuse.
 
 ## Lizenz
 - **Software:** GNU General Public License v3.0

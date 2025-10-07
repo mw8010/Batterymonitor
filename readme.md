@@ -3,14 +3,17 @@
 ## Overview
 This project is a DIY battery monitor for our trawler. It uses an ESP32 to measure current, voltage, and power with the INA226 sensor. The collected data is integrated into Signal K via SenseESP. Additionally, a OneWire temperature sensor is used to monitor battery temperature.
 
-## Why High-Side Current Sensing?
+## Why Low-Side Current Sensing?
 
-High-side current sensing means placing the shunt resistor between the positive battery terminal and the load. This method has several advantages:
+Low-side current sensing means placing the shunt resistor between the negative battery terminal and ground (system GND). This method is recommended for higher battery voltages (e.g. 48V), as it keeps the INA226 within its voltage specifications and avoids damage or incorrect measurements.
 
-- It ensures that all current drawn from the battery is accurately measured, avoiding errors caused by multiple ground paths.
-- It prevents ground loops, which can introduce noise and affect measurement accuracy.
-- It is safer for systems with multiple ground connections and helps maintain proper system grounding.
-- Modern sensors like the INA226 are designed for high-side sensing, providing better accuracy and compatibility with high-voltage applications.
+**Advantages:**
+- The INA226 always operates within its safe voltage range (max. 36V common-mode).
+- Simple and safe wiring for most installations (vehicles, boats).
+- No need for a voltage divider at the INA226 input.
+
+**Note:**  
+The measured current may have an inverted sign. This is corrected in the software.
 
 ## What is Signal K?
 [Signal K](https://signalk.org/) is an open data format for marine electronics. It enables the integration and exchange of sensor data between various devices and applications on board a boat.
@@ -36,9 +39,9 @@ High-side current sensing means placing the shunt resistor between the positive 
 ## Terminal Assignments
 | Terminal | Label             | Description            |
 |----------|------------------|------------------------|
-| **U1**   | Power IN         | + / - (6 - 32V)       |
+| **U1**   | Power IN         | + / - (6 - 48V)       |
 | **U2**   | Temperature Sensor | + / - / Data          |
-| **U4**   | INA226           | VBUS / IN - / IN +    |
+| **U4**   | INA226           | VBUS / IN- / IN+      |
 
 ## Signal K Data Points
 - `electrical.batteries.<battery_name>.voltage` – Battery voltage in V
@@ -84,7 +87,7 @@ The data should now appear on the Signal K server under the configured paths.
 ## Configuration
 The following parameters can be adjusted via the SenseESP web UI:
 - Battery type (LiFePO4, AGM, Gel, Lead-Acid)
-- Battery voltage (12V, 24V, 48V (LifePO4 only))
+- Battery voltage (12V, 24V, 48V (LiFePO4 only))
 - Battery capacity in Ah
 - Maximum shunt current
 - Shunt voltage in mV
@@ -98,20 +101,20 @@ The following parameters can be adjusted via the SenseESP web UI:
 - Alarm notifications are triggered when defined thresholds are exceeded.
 
 ### Hardware Installation Notes
-**Shunt Resistor**
+**Shunt Resistor (Low-Side Measurement)**
 
-- The shunt resistor must be installed on the high side of the battery. This means that the shunt is placed between the positive battery terminal and the load.
-- Connect the positive battery terminal to one end of the shunt resistor.
-- Connect the other end of the shunt resistor to the load (e.g., the consumer or the charger).
+- The shunt resistor must be installed between the negative battery terminal and the system ground (GND).
+- Connect the negative battery terminal to one end of the shunt resistor.
+- Connect the other end of the shunt resistor to the system ground (GND).
+- All consumers and the ESP32 remain connected to system ground as usual.
 - Ensure that all connections are tight and secure to ensure accurate measurements.
 
-**INA226 Sensor**
+**INA226 Sensor (Low-Side Wiring)**
 
-- Connect the INA226 sensor to the shunt resistor according to the schematic.
-- Ensure that the voltage and current measurement lines are connected correctly:
-  - `VIN+` of the INA226 to the end of the shunt connected to the positive battery terminal.
-  - `VIN-` of the INA226 to the end of the shunt connected to the load.
-  - `VBUS` connected to the positive battery terminal.
+- Connect the INA226 sensor to the shunt resistor according to the schematic:
+  - `IN+` of the INA226 to the end of the shunt connected to the negative battery terminal.
+  - `IN-` of the INA226 to the end of the shunt connected to system ground (GND).
+  - `VBUS` connected to system ground (GND).
 - Connect the INA226 sensor to the ESP32 according to the schematic.
 
 **ESP32**
@@ -146,4 +149,3 @@ In the `/3d-files` folder, you will find STEP files for a suitable enclosure tha
 
 ## Acknowledgments
 This project is based on the [Battery Monitor Project by Techstyleuk](https://github.com/Techstyleuk/SensESP_3_Battery_Monitor).
-
